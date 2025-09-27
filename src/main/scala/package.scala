@@ -17,5 +17,35 @@ package object Huffman {
     Nodo(izq, der, cars(izq) ::: cars(der), peso(izq) + peso(der))
   }
 
+  /*
+  Recibe la palabra como una lista de caracteres y devuelve
+  una lista de tuplas en la que cada caracter esta asociado a su frecuencia
+   */
+  def ocurrencias(cars: List[Char]): List[(Char, Int)] = {
+    def lookForX(x: Char, accL: List[(Char, Int)]):Boolean = {
+      accL match {
+        case Nil => false
+        case (a, _) :: t => if (a == x) true else lookForX(x, t)
+      }
+    }
+
+    def updateX(x: Char, accL: List[(Char, Int)]): List[(Char, Int)] = {
+      accL match {
+        case Nil => Nil
+        case (a, b) :: t => if (a == x) (x, b + 1) :: t else (a, b) :: updateX(x, t)
+      }
+    }
+
+    def find(cars: List[Char], accL: List[(Char, Int)]): List[(Char, Int)] = cars match {
+      case Nil => accL
+      case x :: t =>
+        val accL2 =
+          if (lookForX(x, accL)) updateX(x, accL)
+          else (x, 1) :: accL
+        find(t, accL2)
+    }
+
+    find(cars, Nil)
+  }
 
 }
