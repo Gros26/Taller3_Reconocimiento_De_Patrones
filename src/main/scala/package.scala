@@ -1,3 +1,5 @@
+import scala.annotation.tailrec
+
 package object Huffman {
   abstract class ArbolH
   case class Nodo(izq: ArbolH, der: ArbolH, cars: List[Char], peso: Int) extends ArbolH
@@ -22,6 +24,7 @@ package object Huffman {
   una lista de tuplas en la que cada caracter esta asociado a su frecuencia
    */
   def ocurrencias(cars: List[Char]): List[(Char, Int)] = {
+    @tailrec
     def lookForX(x: Char, accL: List[(Char, Int)]):Boolean = {
       accL match {
         case Nil => false
@@ -36,16 +39,17 @@ package object Huffman {
       }
     }
 
-    def find(cars: List[Char], accL: List[(Char, Int)]): List[(Char, Int)] = cars match {
+    @tailrec
+    def ocurrenciasR(cars: List[Char], accL: List[(Char, Int)]): List[(Char, Int)] = cars match {
       case Nil => accL
       case x :: t =>
         val accL2 =
           if (lookForX(x, accL)) updateX(x, accL)
           else (x, 1) :: accL
-        find(t, accL2)
+        ocurrenciasR(t, accL2)
     }
 
-    find(cars, Nil)
+    ocurrenciasR(cars, Nil)
   }
 
 }
