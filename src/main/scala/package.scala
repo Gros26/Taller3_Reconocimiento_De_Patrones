@@ -52,4 +52,28 @@ package object Huffman {
     ocurrenciasR(cars, Nil)
   }
 
+
+  def listaDeHojasOrdenadas(frecs: List[(Char, Int)]):List[Hoja] = {
+    frecs match {
+      case Nil => Nil
+      case (a,b) :: t => Hoja(a,b) :: listaDeHojasOrdenadas(t)
+    }
+
+    def msort(xs: List[Int]):List[Int] = {
+      def merge(l1: List[Int], l2: List[Int]): List[Int] = (l1, l2) match {
+        case (Nil, _) => l2
+        case (_, Nil) => l1
+        case (m :: ms, n :: ns) => if (m < n) m :: merge(ms, l2) else n :: merge(l1, ns)
+      }
+
+      val n = xs.length / 2
+      if (n == 0) xs
+      else {
+        val (l1, l2) = xs splitAt n
+        merge(msort(l1),msort(l2))
+      }
+    }
+    
+  }
+
 }
