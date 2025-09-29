@@ -90,10 +90,10 @@ package object Huffman {
         if (peso(x) <= peso(y)) x :: xs
         else y :: insertarOrdenado(x, ys)
     }
-    
+
     arboles match {
-      case Nil        => Nil
-      case _ :: Nil   => arboles
+      case Nil => Nil
+      case _ :: Nil => arboles
       case h1 :: h2 :: t =>
         val nuevo = hacerNodoArbolH(h1, h2)
         insertarOrdenado(nuevo, t)
