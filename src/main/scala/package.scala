@@ -54,16 +54,11 @@ package object Huffman {
 
 
   def listaDeHojasOrdenadas(frecs: List[(Char, Int)]):List[Hoja] = {
-    frecs match {
-      case Nil => Nil
-      case (a,b) :: t => Hoja(a,b) :: listaDeHojasOrdenadas(t)
-    }
-
-    def msort(xs: List[Int]):List[Int] = {
-      def merge(l1: List[Int], l2: List[Int]): List[Int] = (l1, l2) match {
+    def msort(xs: List[Hoja]):List[Hoja] = {
+      def merge(l1: List[Hoja], l2: List[Hoja]): List[Hoja] = (l1, l2) match {
         case (Nil, _) => l2
         case (_, Nil) => l1
-        case (m :: ms, n :: ns) => if (m < n) m :: merge(ms, l2) else n :: merge(l1, ns)
+        case (m :: ms, n :: ns) => if (m.peso < n.peso) m :: merge(ms, l2) else n :: merge(l1, ns)
       }
 
       val n = xs.length / 2
@@ -73,7 +68,39 @@ package object Huffman {
         merge(msort(l1),msort(l2))
       }
     }
-    
+
+    msort(frecs match {
+      case Nil => Nil
+      case (a, b) :: t => Hoja(a, b) :: listaDeHojasOrdenadas(t)
+    })
   }
 
+  def listaUnitaria(arboles: List[ArbolH]):Boolean = {
+    arboles match {
+      case Nil => false
+      case h :: t => if (t.isEmpty) true else false
+    }
+  }
+
+  def combinar(arboles: List[ArbolH]):List[ArbolH] = {
+    arboles match {
+      case Nil => Nil
+      case h :: Nil => h :: Nil
+      case h :: h2 :: t => hacerNodoArbolH(h, h2) :: t
+    }
+
+    //aqui faltaria organizal esta lista resultante
+  }
+
+  @tailrec
+  def hastaQue(cond: List[ArbolH] => Boolean, mezclar: List[ArbolH] => List[ArbolH])
+              (listaOrdenadaArboles: List[ArbolH]): List[ArbolH] = {
+
+    if (cond(listaOrdenadaArboles)) listaOrdenadaArboles else hastaQue(cond, mezclar)(mezclar(listaOrdenadaArboles))
+
+  }
+
+  def crearArbolDeHuffman(cars: List[Char]):ArbolH = {
+    
+  }
 }
