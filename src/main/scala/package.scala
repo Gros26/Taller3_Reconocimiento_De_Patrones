@@ -109,13 +109,8 @@ package object Huffman {
   }
 
   def crearArbolDeHuffman(cars: List[Char]):ArbolH = {
-    /*
-    cars
-→ ocurrencias
-→ listaDeHojasOrdenadas  (List[Hoja] es también List[ArbolH])
-→ hastaQue(listaUnitaria, combinar)
-→ tomar el único árbol resultante
-     */
-
+    val hojas: List[ArbolH] = listaDeHojasOrdenadas(ocurrencias(cars))
+    val List(arbolFinal) = hastaQue(listaUnitaria, combinar)(hojas)
+    arbolFinal
   }
 }
