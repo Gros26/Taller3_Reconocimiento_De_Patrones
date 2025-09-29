@@ -83,13 +83,21 @@ package object Huffman {
   }
 
   def combinar(arboles: List[ArbolH]):List[ArbolH] = {
-    arboles match {
-      case Nil => Nil
-      case h :: Nil => h :: Nil
-      case h :: h2 :: t => hacerNodoArbolH(h, h2) :: t
-    }
 
-    //aqui faltaria organizal esta lista resultante
+    def insertarOrdenado(x: ArbolH, xs: List[ArbolH]): List[ArbolH] = xs match {
+      case Nil => x :: Nil
+      case y :: ys =>
+        if (peso(x) <= peso(y)) x :: xs
+        else y :: insertarOrdenado(x, ys)
+    }
+    
+    arboles match {
+      case Nil        => Nil
+      case _ :: Nil   => arboles
+      case h1 :: h2 :: t =>
+        val nuevo = hacerNodoArbolH(h1, h2)
+        insertarOrdenado(nuevo, t)
+    }
   }
 
   @tailrec
@@ -101,6 +109,13 @@ package object Huffman {
   }
 
   def crearArbolDeHuffman(cars: List[Char]):ArbolH = {
-    
+    /*
+    cars
+→ ocurrencias
+→ listaDeHojasOrdenadas  (List[Hoja] es también List[ArbolH])
+→ hastaQue(listaUnitaria, combinar)
+→ tomar el único árbol resultante
+     */
+
   }
 }
