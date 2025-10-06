@@ -130,7 +130,7 @@ package object Huffman {
           }
       }
     }
-    iterator(arbol, bits, Nil)
+    iterator(arbol, bits, Nil).reverse
   }
 
   def codificar(arbol: ArbolH)(texto: List[Char]): List[Bit] = {
@@ -168,25 +168,22 @@ package object Huffman {
   }
 
   def mezclarTablasDeCodigos(a: TablaCodigos, b: TablaCodigos): TablaCodigos = {
-    def organizarCodigos(bit: Bit, tabla: TablaCodigos): TablaCodigos = {
-      tabla map ((c, bits) => (c, bit :: bits))
-    }
 
-    organizarCodigos(0, a) ++ organizarCodigos(1, b)
-  }
-
-  def convertir(arbol: ArbolH): TablaCodigos = {
-
-    def helper(a: ArbolH): TablaCodigos = {
-      a match {
-        case Hoja(c, _) => List((c, Nil))
-        case Nodo(i, d, _, _) => mezclarTablasDeCodigos(helper(i), helper(d))
+    @tailrec
+    def organizarCodigos(bit: Bit, tabla: TablaCodigos, acc: TablaCodigos): TablaCodigos = {
+      tabla match {
+        case Nil => acc
+        case (c, bits) :: t => organizarCodigos(bit, t, (c, bit::bits) :: acc)
       }
     }
 
+    organizarCodigos(0, a, Nil) ++ organizarCodigos(1, b, Nil)
+  }
+
+  def convertir(arbol: ArbolH): TablaCodigos = {
     arbol match {
-      case Hoja(c, _) => List((c, 0 :: Nil))
-      case _ => helper(arbol)
+      case Hoja(c, _) => List((c, Nil))
+      case Nodo(i, d, cars, _) => mezclarTablasDeCodigos(convertir(i), convertir(d))
     }
   }
 
