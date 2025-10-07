@@ -87,13 +87,13 @@ package object Huffman {
     def insertarOrdenado(x: ArbolH, xs: List[ArbolH]): List[ArbolH] = xs match {
       case Nil => x :: Nil
       case y :: ys =>
-        if (peso(x) <= peso(y)) x :: xs
+        if (peso(x) < peso(y)) x :: xs
         else y :: insertarOrdenado(x, ys)
     }
-
+    
     arboles match {
-      case Nil => Nil
-      case _ :: Nil => arboles
+      case Nil        => Nil
+      case _ :: Nil   => arboles
       case h1 :: h2 :: t =>
         val nuevo = hacerNodoArbolH(h1, h2)
         insertarOrdenado(nuevo, t)
@@ -112,5 +112,92 @@ package object Huffman {
     val hojas: List[ArbolH] = listaDeHojasOrdenadas(ocurrencias(cars))
     val List(arbolFinal) = hastaQue(listaUnitaria, combinar)(hojas)
     arbolFinal
+  }
+  type Bit = Int
+
+  def decodificar(arbol: ArbolH, bits: List[Bit]) : List[Char] = {
+    @tailrec
+    def iterator(ubicacion: ArbolH, bitsRestantes: List[Bit], cadena: List[Char]): List[Char] = {
+      ubicacion match {
+        case Hoja(c, _) =>
+          if (bitsRestantes.isEmpty) c :: cadena
+          else iterator(arbol, bitsRestantes, c :: cadena)
+
+        case Nodo(i, d, c, p) =>
+          bitsRestantes match {
+            case 0 :: t => iterator(i, t, cadena)
+            case 1 :: t => iterator(d, t, cadena)
+          }
+      }
+    }
+    iterator(arbol, bits, Nil).reverse
+  }
+
+  def codificar(arbol: ArbolH)(texto: List[Char]): List[Bit] = {
+
+    def codigoHasta(car: Char, a: ArbolH): List[Bit] = {
+      a match {
+        case Hoja(c, _) => Nil
+        case Nodo(i, d, cs, _) =>
+          if (cars(i).contains(car))
+            0 :: codigoHasta(car, i)
+          else
+            1 :: codigoHasta(car, d)
+      }
+    }
+
+    @tailrec
+    def iterator(textoRestante: List[Char], codigoAccum: List[Bit]): List[Bit] = {
+      textoRestante match {
+        case Nil => codigoAccum
+        case h :: t => iterator(t, codigoAccum ++ codigoHasta(h, arbol))
+      }
+    }
+
+    iterator(texto, Nil)
+  }
+
+  type TablaCodigos = List[(Char, List[Bit])]
+
+  @tailrec
+  def codigoEnBits(tabla: TablaCodigos)(car: Char): List[Bit] = {
+    tabla match {
+      case (c, li) :: t => if (c == car) li else codigoEnBits(t)(car)
+      case Nil => List()
+    }
+  }
+
+  def mezclarTablasDeCodigos(a: TablaCodigos, b: TablaCodigos): TablaCodigos = {
+
+    @tailrec
+    def organizarCodigos(bit: Bit, tabla: TablaCodigos, acc: TablaCodigos): TablaCodigos = {
+      tabla match {
+        case Nil => acc
+        case (c, bits) :: t => organizarCodigos(bit, t, (c, bit::bits) :: acc)
+      }
+    }
+
+    organizarCodigos(0, a, Nil) ++ organizarCodigos(1, b, Nil)
+  }
+
+  def convertir(arbol: ArbolH): TablaCodigos = {
+    arbol match {
+      case Hoja(c, _) => List((c, Nil))
+      case Nodo(i, d, cars, _) => mezclarTablasDeCodigos(convertir(i), convertir(d))
+    }
+  }
+
+  def codificarRapido(arbol: ArbolH) (texto: List[Char]): List[Bit] = {
+    val tabla: TablaCodigos = convertir(arbol)
+
+    @tailrec
+    def iterator(textoRestante: List[Char], codigoAccum: List[Bit]): List[Bit] = {
+      textoRestante match {
+        case Nil => codigoAccum
+        case h :: t => iterator(t, codigoAccum ++ codigoEnBits(tabla)(h))
+      }
+    }
+
+    iterator(texto, Nil)
   }
 }
